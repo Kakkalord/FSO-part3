@@ -1,5 +1,17 @@
 const express = require('express')
 const app = express()
+const morgan = require('morgan')
+const cors = require('cors')
+
+morgan.token('body', req => {
+  return JSON.stringify(req.body)
+})
+
+app.use(express.json())
+app.use(morgan('tiny'))
+//app.use(morgan(':method :url :body :rest[content-length] - :response-time ms :body'))
+app.use(cors())
+app.use(express.static('dist'))
 
 let persons = [
   { 
@@ -24,6 +36,7 @@ let persons = [
   }
 ]
 
+
 const info = (persons) => {
   const now = new Date()
   const currentDateTime = now.toLocaleString()
@@ -39,18 +52,6 @@ const generateRandomId = () => {
     Math.floor(Math.random() * 1000)
   )
 }
-
-app.use(express.json())
-
-const requestLogger = (request, response, next) => {
-    console.log('Method', request.method)
-    console.log('Path: ', request.path)
-    console.log('Body: ', request.body)
-    console.log('---')
-    next()
-}
-
-app.use(requestLogger)
 
 app.get('/', (request, response) => {
   response.send('<h1>Hello Clarence!</h1>')
@@ -104,4 +105,10 @@ app.post('/api/persons/:id', (request,response) => {
   persons = persons.concat(person)
 
   response.json(note)
+
+})
+
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
 })
